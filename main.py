@@ -27,7 +27,7 @@ def load_model():
             sentiment_model = pipeline(
                 "sentiment-analysis",
                 model=MODEL_PATH,
-                tokenizer=MODEL_PATH,
+                tokenizer="bert-base-uncased",  # Use default BERT tokenizer
                 device=0 if torch.cuda.is_available() else -1
             )
         except Exception as e:
