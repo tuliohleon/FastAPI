@@ -3,6 +3,10 @@ from pydantic import BaseModel
 from transformers import pipeline
 import torch
 import os
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="BERT Sentiment Analysis API", version="1.0.0")
 
@@ -43,20 +47,25 @@ async def root():
 
 @app.post("/analyze", response_model=SentimentResponse)
 async def analyze_sentiment(request: SentimentRequest):
+    logger.info(f"Received text: {request.text}")
     if not request.text.strip():
         raise HTTPException(status_code=400, detail="Text cannot be empty")
 
     try:
+        logger.info("Starting sentiment analysis")
         # Perform sentiment analysis
         result = sentiment_model(request.text)[0]
+        logger.info(f"Model result: {result}")
 
         # Extract label and confidence
         label = result['label'].lower()
         confidence = round(result['score'], 4)
+        logger.info(f"Processed label: {label}, confidence: {confidence}")
 
         return SentimentResponse(label=label, confidence=confidence)
 
     except Exception as e:
+        logger.error(f"Analysis failed with exception: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
 
 @app.get("/health")
