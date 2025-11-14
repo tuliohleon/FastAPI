@@ -29,9 +29,8 @@ def load_model():
         try:
             # Load the fine-tuned model
             sentiment_model = pipeline(
-                "sentiment-analysis",
+                "text-classification",
                 model=MODEL_PATH,
-                tokenizer="bert-base-uncased",  # Use default BERT tokenizer
                 device=0 if torch.cuda.is_available() else -1
             )
         except Exception as e:
@@ -58,7 +57,13 @@ async def analyze_sentiment(request: SentimentRequest):
         logger.info(f"Model result: {result}")
 
         # Extract label and confidence
-        label = result['label'].lower()
+        raw_label = result['label']
+        if raw_label == 'LABEL_0':
+            label = 'negative'
+        elif raw_label == 'LABEL_1':
+            label = 'positive'
+        else:
+            label = raw_label.lower()
         confidence = round(result['score'], 4)
         logger.info(f"Processed label: {label}, confidence: {confidence}")
 
