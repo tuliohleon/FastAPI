@@ -31,6 +31,7 @@ def load_model():
             sentiment_model = pipeline(
                 "text-classification",
                 model=MODEL_PATH,
+                tokenizer="bert-base-uncased",
                 device=0 if torch.cuda.is_available() else -1
             )
         except Exception as e:
